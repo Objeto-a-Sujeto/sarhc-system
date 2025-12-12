@@ -1,11 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Moon, Sun, Download, Eye, EyeOff } from "lucide-react";
-import { useTheme } from "next-themes";
 
 export default function SARHCApp() {
-  const { theme, setTheme } = useTheme();
+  const [theme, setTheme] = useState("light");
   const [formData, setFormData] = useState({
     inventoryID: "",
     anatomy: "",
@@ -15,6 +14,19 @@ export default function SARHCApp() {
     notes: "",
     isVisuallyRestricted: false
   });
+
+  useEffect(() => {
+    const savedTheme = localStorage.getItem("theme") || "light";
+    setTheme(savedTheme);
+    document.documentElement.className = savedTheme;
+  }, []);
+
+  const toggleTheme = () => {
+    const newTheme = theme === "light" ? "dark" : "light";
+    setTheme(newTheme);
+    localStorage.setItem("theme", newTheme);
+    document.documentElement.className = newTheme;
+  };
 
   const anatomyOptions = [
     { value: "FMA:7295", label: "Cráneo" },
@@ -83,28 +95,24 @@ export default function SARHCApp() {
     URL.revokeObjectURL(url);
   };
 
-  const toggleTheme = () => {
-    setTheme(theme === "dark" ? "light" : "dark");
-  };
-
   return (
-    <div className="min-h-screen bg-background text-foreground p-4">
+    <div className={`min-h-screen ${theme === 'dark' ? 'bg-gray-900 text-white' : 'bg-white text-gray-900'} p-4`}>
       <div className="max-w-4xl mx-auto">
         <div className="flex justify-between items-center mb-8">
           <div>
             <h1 className="text-3xl font-bold">S.A.R.H.C.</h1>
-            <p className="text-muted-foreground">Sistema de Adaptación de Restos Humanos en Colección</p>
+            <p className="text-gray-600 dark:text-gray-400">Sistema de Adaptación de Restos Humanos en Colección</p>
           </div>
           <button
             onClick={toggleTheme}
-            className="p-2 rounded-lg border hover:bg-accent transition-colors"
+            className={`p-2 rounded-lg border ${theme === 'dark' ? 'bg-gray-800 border-gray-700 hover:bg-gray-700' : 'bg-gray-100 border-gray-300 hover:bg-gray-200'} transition-colors`}
           >
             {theme === "dark" ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
           </button>
         </div>
 
         <div className="grid gap-6">
-          <div className="p-6 border rounded-lg">
+          <div className={`p-6 rounded-lg ${theme === 'dark' ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'} border`}>
             <h2 className="text-xl font-semibold mb-4">Información del Espécimen</h2>
             
             <div className="grid gap-4">
@@ -114,7 +122,7 @@ export default function SARHCApp() {
                   type="text"
                   value={formData.inventoryID}
                   onChange={(e) => setFormData(prev => ({ ...prev, inventoryID: e.target.value }))}
-                  className="w-full p-2 border rounded-md bg-background"
+                  className={`w-full p-2 border rounded-md ${theme === 'dark' ? 'bg-gray-700 border-gray-600 text-white' : 'bg-white border-gray-300 text-gray-900'}`}
                   placeholder="Ej: HRC-2024-001"
                 />
               </div>
@@ -124,7 +132,7 @@ export default function SARHCApp() {
                 <select
                   value={formData.anatomy}
                   onChange={(e) => setFormData(prev => ({ ...prev, anatomy: e.target.value }))}
-                  className="w-full p-2 border rounded-md bg-background"
+                  className={`w-full p-2 border rounded-md ${theme === 'dark' ? 'bg-gray-700 border-gray-600 text-white' : 'bg-white border-gray-300 text-gray-900'}`}
                 >
                   <option value="">Selecciona...</option>
                   {anatomyOptions.map(option => (
@@ -138,7 +146,7 @@ export default function SARHCApp() {
                 <select
                   value={formData.origin}
                   onChange={(e) => handleOriginChange(e.target.value)}
-                  className="w-full p-2 border rounded-md bg-background"
+                  className={`w-full p-2 border rounded-md ${theme === 'dark' ? 'bg-gray-700 border-gray-600 text-white' : 'bg-white border-gray-300 text-gray-900'}`}
                 >
                   <option value="">Selecciona...</option>
                   {originContexts.map(option => (
@@ -165,7 +173,7 @@ export default function SARHCApp() {
                 <textarea
                   value={formData.notes}
                   onChange={(e) => setFormData(prev => ({ ...prev, notes: e.target.value }))}
-                  className="w-full p-2 border rounded-md bg-background"
+                  className={`w-full p-2 border rounded-md ${theme === 'dark' ? 'bg-gray-700 border-gray-600 text-white' : 'bg-white border-gray-300 text-gray-900'}`}
                   rows={3}
                   placeholder="Notas adicionales..."
                 />
@@ -173,43 +181,8 @@ export default function SARHCApp() {
             </div>
           </div>
 
-          <div className="p-6 border rounded-lg">
+          <div className={`p-6 rounded-lg ${theme === 'dark' ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'} border`}>
             <h2 className="text-xl font-semibold mb-4">Estado Ético</h2>
             
             <div className="grid gap-4">
-              <div className="flex justify-between items-center p-3 bg-muted rounded">
-                <span>Nivel de Riesgo:</span>
-                <span className={`px-2 py-1 rounded text-sm ${
-                  formData.riskLevel === "high" ? "bg-red-100 text-red-800" :
-                  formData.riskLevel === "medium" ? "bg-yellow-100 text-yellow-800" :
-                  "bg-green-100 text-green-800"
-                }`}>
-                  {formData.riskLevel === "high" ? "Alto" :
-                   formData.riskLevel === "medium" ? "Medio" : "Bajo"}
-                </span>
-              </div>
-
-              <div className="flex justify-between items-center p-3 bg-muted rounded">
-                <span>Restricción Visual:</span>
-                <span className={`px-2 py-1 rounded text-sm flex items-center gap-2 ${
-                  formData.isVisuallyRestricted ? "bg-red-100 text-red-800" : "bg-green-100 text-green-800"
-                }`}>
-                  {formData.isVisuallyRestricted ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                  {formData.isVisuallyRestricted ? "Restringido" : "Público"}
-                </span>
-              </div>
-            </div>
-          </div>
-
-          <button
-            onClick={exportJSONLD}
-            className="flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 transition-colors"
-          >
-            <Download className="h-4 w-4" />
-            Exportar JSON-LD
-          </button>
-        </div>
-      </div>
-    </div>
-  );
-}
+              <div className=
