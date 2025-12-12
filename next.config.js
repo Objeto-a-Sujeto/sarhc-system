@@ -5,6 +5,11 @@ const nextConfig = {
   poweredByHeader: false,
   trailingSlash: false,
   skipTrailingSlashRedirect: true,
+  output: 'export',
+  distDir: 'out',
+  images: {
+    unoptimized: true
+  }
 };
 
 module.exports = nextConfig;
